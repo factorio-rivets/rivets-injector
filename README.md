@@ -7,7 +7,7 @@
     </a>
 
 [![Discord](https://img.shields.io/discord/1260754935952314418?color=lightblue&label=Community%20Chat&logo=Discord&logoColor=aqua)](https://discord.gg/xRYEZYz5WR)
-[![](https://img.shields.io/badge/License-Rivets_2024-green)](https://github.com/notnotmelon/rivets/blob/master/LICENSE.md)
+[![](https://img.shields.io/badge/License-Rivets_2024-green)](https://github.com/factorio-rivets/rivets-injector/blob/master/LICENSE.md)
 
 </div>
 
