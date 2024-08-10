@@ -170,7 +170,7 @@ struct Cli {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    
+
     let (stdout_read, _) = create_pipe()?;
     let mut reader = unsafe { std::fs::File::from_raw_handle(stdout_read.0) };
 
