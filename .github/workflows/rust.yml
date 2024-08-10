@@ -75,6 +75,8 @@ jobs:
           uses: actions/checkout@v3
         - name: Setup ${{ matrix.toolchain }} toolchain
           run: rustup toolchain install ${{ matrix.toolchain }} --target ${{ matrix.platform.target }} --profile minimal
+        - name: Select ${{ matrix.toolchain }} toolchain
+          run: rustup default ${{ matrix.toolchain }}
         - name: Rust cache
           uses: Swatinem/rust-cache@v2
           with:
