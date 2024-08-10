@@ -12,7 +12,7 @@
 </div>
 
 # Rivets injector 🔩
-A small windows application that injects the librivets .dll
+A small windows application that injects the `rivets.dll`.
 Intended to be small, simple, and stable. Should be updated very infrequently.
 
 Preforms the following operations:
