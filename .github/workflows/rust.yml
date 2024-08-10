@@ -17,7 +17,7 @@ env:
 jobs:
   fmt:
     name: Check formatting
-    runs-on: windows-latest
+    runs-on: linux-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: windows-latest
+    runs-on: linux-latest
     if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     steps:
       - name: Checkout
@@ -63,6 +63,11 @@ jobs:
             - os_name: Windows-x86_64
               os: windows-latest
               target: x86_64-pc-windows-gnu
+              args: "--bin rivets-injector"
+            - os_name: Linux-x86_64
+              os: ubuntu-latest
+              target: x86_64-unknown-linux-gnu
+              args: "--lib"
           toolchain:
             - nightly
     steps:
@@ -76,4 +81,4 @@ jobs:
             prefix-key: "rust-${{ matrix.toolchain }}"
             shared-key: "build-${{ matrix.platform.target }}"
         - name: Build
-          run: cargo build --target ${{ matrix.platform.target }}
+          run: cargo build --target ${{ matrix.platform.target }} ${{ matrix.platform.args }}
