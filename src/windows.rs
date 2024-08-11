@@ -114,6 +114,7 @@ fn inject_dll<'a>(
     dll_path: &Path,
 ) -> Result<ProcessModule<BorrowedProcess<'a>>> {
     println!("Injecting DLL into Factorio process...");
+    println!("\t{}", dll_path.display());
 
     syringe
         .inject(dll_path)
@@ -189,7 +190,9 @@ pub fn run() -> Result<()> {
     let syringe = get_syringe().inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
-    inject_dll(&syringe, &dll_path)?;
+    inject_dll(&syringe, &dll_path).inspect_err(|_| {
+        attempt_kill_factorio(factorio_process_information);
+    })?;
     println!("DLL injected successfully.");
 
     unsafe {
