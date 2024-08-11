@@ -93,7 +93,7 @@ pub fn get_data_dirs(bin_path: impl AsRef<Path>) -> Result<(PathBuf, PathBuf), C
 
     let mut config = Ini::new();
     config
-        .load(resolve_path(config_path, &bin_path)?)
+        .load(resolve_path(config_path, &bin_path)?.join("config.ini"))
         .map_err(ConfigError::Config)?;
 
     let read_path = config
