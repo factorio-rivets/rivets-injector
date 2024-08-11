@@ -10,7 +10,7 @@ on:
   push:
     branches:
       - main
-      
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -28,8 +28,10 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
+    permissions:
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,7 +45,7 @@ jobs:
           prefix-key: "rust-stable"
           shared-key: "clippy"
       - name: Install cargo-binstall
-        run: wget https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-gnu.tgz -O - | tar -xz -C $HOME/.cargo/bin  
+        uses: cargo-bins/cargo-binstall@main
       - name: Install sarif-fmt & clippy-sarif
         run: cargo binstall --no-confirm --force sarif-fmt clippy-sarif
       - name: Run Clippy
