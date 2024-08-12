@@ -8,6 +8,7 @@ anyhow = "1.0.86"
 semver = "1.0.23"
 thiserror = "1.0.63"
 configparser = "3.1.0"
+mod_util = { git = "https://github.com/fgardt/factorio-scanner" }
 
 [target.'cfg(windows)'.dependencies]
 zip = "2.1.6"
