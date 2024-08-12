@@ -119,7 +119,7 @@ pub fn run() -> Result<()> {
     println!("Factorio path: {factorio_path:?}");
     let factorio_path = PCSTR(factorio_path.as_ptr().cast());
 
-    let dll_path = common::extract_rivets_lib(read_path, write_path)?;
+    let dll_path = common::extract_rivets_lib(&read_path, &write_path)?;
 
     let factorio_process_information: PROCESS_INFORMATION = start_factorio(factorio_path)?;
     println!("Factorio process started.");
