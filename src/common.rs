@@ -7,7 +7,7 @@ use std::{
 
 use configparser::ini::Ini;
 use mod_util::{
-    mod_list::{self, ModList, ModListError},
+    mod_list::{ModList, ModListError},
     mod_loader::ModError,
 };
 
@@ -151,4 +151,20 @@ pub fn extract_rivets_lib(
     std::fs::write(&lib_path, lib)?;
 
     Ok(lib_path)
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BinFolderError {
+    #[error("Failed to get binary path: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Failed to get binary folder")]
+    BinFolder,
+}
+
+pub fn get_bin_folder() -> Result<PathBuf, BinFolderError> {
+    std::env::current_exe()?
+        .parent()
+        .map(std::path::Path::to_path_buf)
+        .ok_or(BinFolderError::BinFolder)
 }

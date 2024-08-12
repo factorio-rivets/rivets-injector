@@ -1,14 +1,12 @@
 use crate::common;
 
 pub fn run() {
-    let Ok(bin_path) = std::env::current_exe() else {
-        eprintln!("Failed to get binary path");
-        return;
-    };
-
-    let Some(bin_folder) = bin_path.parent() else {
-        eprintln!("Failed to get binary folder");
-        return;
+    let bin_folder = match common::get_bin_folder() {
+        Ok(folder) => folder,
+        Err(e) => {
+            eprintln!("{e}");
+            return;
+        }
     };
 
     let (read_data, write_data) = match common::get_data_dirs(bin_folder) {
