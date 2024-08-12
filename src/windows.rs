@@ -135,7 +135,10 @@ fn rpc(
         syringe.get_payload_procedure::<fn(PathBuf, PathBuf) -> Option<String>>(module, "main")
     }?
     .ok_or(anyhow!("Failed to get RPC procedure"))?;
-    match rpc.call(&read_path.as_ref().to_path_buf(), &write_path.as_ref().to_path_buf())? {
+    match rpc.call(
+        &read_path.as_ref().to_path_buf(),
+        &write_path.as_ref().to_path_buf(),
+    )? {
         Some(err) => bail!(err),
         None => Ok(()),
     }
