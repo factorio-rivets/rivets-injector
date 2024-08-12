@@ -132,7 +132,10 @@ fn rpc(
     write_path: impl AsRef<Path>,
 ) -> Result<()> {
     let rpc = unsafe {
-        syringe.get_payload_procedure::<fn(PathBuf, PathBuf) -> Option<String>>(module, "main")
+        syringe.get_payload_procedure::<fn(PathBuf, PathBuf) -> Option<String>>(
+            module,
+            "payload_procedure",
+        )
     }?
     .ok_or(anyhow!("Failed to get RPC procedure"))?;
     match rpc.call(
