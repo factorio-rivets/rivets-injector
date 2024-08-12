@@ -1,12 +1,10 @@
 //! A small windows application to inject the Rivets DLL into Factorio.
 
 use crate::common;
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, bail, Result};
 use dll_syringe::process::{BorrowedProcess, ProcessModule};
 use dll_syringe::{process::OwnedProcess, Syringe};
 use std::ffi::CString;
-use std::fs;
-use std::fs::File;
 use std::io;
 use std::os::windows::io::FromRawHandle;
 use std::path::{Path, PathBuf};
@@ -53,7 +51,7 @@ fn rpc(
             "payload_procedure",
         )
     }?
-    .ok_or(anyhow!("Failed to get RPC procedure"))?;
+    .ok_or_else(|| anyhow!("Failed to get RPC procedure"))?;
     match rpc.call(
         &read_path.as_ref().to_path_buf(),
         &write_path.as_ref().to_path_buf(),
@@ -63,6 +61,7 @@ fn rpc(
     }
 }
 
+#[allow(clippy::cast_possible_truncation)]
 fn create_pipe() -> Result<(HANDLE, HANDLE)> {
     let mut stdout_read = INVALID_HANDLE_VALUE;
     let mut stdout_write = INVALID_HANDLE_VALUE;
