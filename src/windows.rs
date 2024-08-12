@@ -125,6 +125,25 @@ fn inject_dll(
         .map_err(|e| anyhow!("Failed to inject DLL: {e}"))
 }
 
+fn rpc(
+    syringe: &Syringe,
+    module: ProcessModule<BorrowedProcess>,
+    read_path: impl AsRef<Path>,
+    write_path: impl AsRef<Path>,
+) -> Result<()> {
+    let rpc = unsafe {
+        syringe.get_payload_procedure::<fn(PathBuf, PathBuf) -> Option<String>>(module, "main")
+    }?
+    .ok_or(anyhow!("Failed to get RPC procedure"))?;
+    match rpc.call(
+        &read_path.as_ref().to_path_buf(),
+        &write_path.as_ref().to_path_buf(),
+    )? {
+        Some(err) => bail!(err),
+        None => Ok(()),
+    }
+}
+
 fn create_pipe() -> Result<(HANDLE, HANDLE)> {
     let mut stdout_read = INVALID_HANDLE_VALUE;
     let mut stdout_write = INVALID_HANDLE_VALUE;
@@ -170,7 +189,7 @@ fn start_factorio(factorio_path: PCSTR) -> Result<PROCESS_INFORMATION> {
 
 pub fn run() -> Result<()> {
     let mut factorio_path = std::env::current_dir()?;
-    let (_, write_path) = common::get_data_dirs(&factorio_path)?;
+    let (read_path, write_path) = common::get_data_dirs(&factorio_path)?;
 
     let (stdout_read, _) = create_pipe()?;
     let mut reader = unsafe { std::fs::File::from_raw_handle(stdout_read.0) };
@@ -188,7 +207,10 @@ pub fn run() -> Result<()> {
     let syringe = get_syringe().inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
-    inject_dll(&syringe, &dll_path).inspect_err(|_| {
+    let module = inject_dll(&syringe, &dll_path).inspect_err(|_| {
+        attempt_kill_factorio(factorio_process_information);
+    })?;
+    rpc(&syringe, module, read_path, write_path).inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
     println!("DLL injected successfully.");
