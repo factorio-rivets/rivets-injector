@@ -6,6 +6,9 @@ edition = "2021"
 [lints.clippy]
 nursery = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "allow"
+trivial_regex = "allow"
 
 [dependencies]
 thiserror = "1.0"
