@@ -35,7 +35,7 @@ pub fn run() {
         };
 
         let entry_point: libloading::Symbol<unsafe extern "C" fn()> =
-            match lib.get(b"rivets_entry_point") {
+            match lib.get(b"rivets_entry_point\0") {
                 Ok(entry_point) => entry_point,
                 Err(e) => {
                     eprintln!("Failed to get rivets entry point: {e}");
