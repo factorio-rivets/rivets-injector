@@ -48,7 +48,7 @@ fn rpc(
     let rpc = unsafe {
         syringe.get_payload_procedure::<fn(PathBuf, PathBuf) -> Option<String>>(
             module,
-            "payload_procedure",
+            "rivetslib_setup",
         )
     }?
     .ok_or_else(|| anyhow!("Failed to get RPC procedure"))?;

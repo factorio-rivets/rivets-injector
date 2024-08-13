@@ -1,3 +1,5 @@
+use abi_stable::std_types::{ROption, RString};
+
 use crate::common;
 
 pub fn run() {
@@ -34,15 +36,20 @@ pub fn run() {
             }
         };
 
-        let entry_point: libloading::Symbol<unsafe extern "C" fn()> =
-            match lib.get(b"rivets_entry_point\0") {
-                Ok(entry_point) => entry_point,
+        let setup: libloading::Symbol<extern "C" fn(RString, RString) -> ROption<RString>> =
+            match lib.get(b"rivetslib_setup\0") {
+                Ok(setup) => setup,
                 Err(e) => {
-                    eprintln!("Failed to get rivets entry point: {e}");
+                    eprintln!("Failed to get rivetslib entry point: {e}");
                     return;
                 }
             };
 
-        entry_point();
+        if let ROption::RSome(err) = setup(
+            read_data.to_string_lossy().into(),
+            write_data.to_string_lossy().into(),
+        ) {
+            eprintln!("{err}");
+        }
     }
 }
