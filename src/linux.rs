@@ -25,5 +25,24 @@ pub fn run() {
         }
     };
 
-    // TODO: load rivets library
+    unsafe {
+        let lib = match libloading::Library::new(rivets_lib) {
+            Ok(lib) => lib,
+            Err(e) => {
+                eprintln!("Failed to load rivets library: {e}");
+                return;
+            }
+        };
+
+        let entry_point: libloading::Symbol<unsafe extern "C" fn()> =
+            match lib.get(b"rivets_entry_point") {
+                Ok(entry_point) => entry_point,
+                Err(e) => {
+                    eprintln!("Failed to get rivets entry point: {e}");
+                    return;
+                }
+            };
+
+        entry_point();
+    }
 }
