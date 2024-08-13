@@ -31,9 +31,6 @@ fn inject_dll(
     syringe: &Syringe,
     dll_path: impl AsRef<Path>,
 ) -> Result<ProcessModule<BorrowedProcess<'_>>> {
-    println!("Injecting DLL into Factorio process...");
-    println!("\t{}", dll_path.as_ref().display());
-
     syringe
         .inject(dll_path)
         .map_err(|e| anyhow!("Failed to inject DLL: {e}"))
@@ -56,7 +53,7 @@ fn rpc(
         &read_path.as_ref().to_path_buf(),
         &write_path.as_ref().to_path_buf(),
     )? {
-        Some(err) => bail!(err),
+        Some(err) => bail!(format!("Failed to preform RPC: {err}")),
         None => Ok(()),
     }
 }
@@ -125,13 +122,23 @@ pub fn run() -> Result<()> {
     let syringe = get_syringe().inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
+
+    println!("Injecting DLL into Factorio process...");
+    println!("\t{}", dll_path.display());
+
     let module = inject_dll(&syringe, &dll_path).inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
+
+    println!("DLL injected successfully.");
+    println!("Performing DLL initialization RPC...");
+
     rpc(&syringe, module, read_path, write_path).inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
-    println!("DLL injected successfully.");
+
+    println!("RPC completed successfully.");
+    println!("Returning control back into Factorio process...");
 
     unsafe {
         ResumeThread(factorio_process_information.hThread);
