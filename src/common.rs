@@ -137,7 +137,8 @@ pub fn extract_rivets_lib(
     #[cfg(target_os = "windows")]
     static RIVETS_LIB: &str = "rivets.dll";
 
-    let mod_list = ModList::generate_custom(read_data, &write_data)?;
+    let mut mod_list = ModList::generate_custom(read_data, &write_data)?;
+    mod_list.load()?;
 
     let Some(rivets) = mod_list.load_mod("rivets")? else {
         return Err(ExtractError::RivetsNotEnabled);
