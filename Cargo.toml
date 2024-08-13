@@ -1,16 +1,22 @@
 [package]
 name = "rivets-injector"
-version = "1.0.2"
+version = "1.1.0"
 edition = "2021"
 
+[lints.clippy]
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "allow"
+trivial_regex = "allow"
+
 [dependencies]
-anyhow = "1.0.86"
-semver = "1.0.23"
-thiserror = "1.0.63"
-configparser = "3.1.0"
+thiserror = "1.0"
+configparser = "3.1"
+mod_util = { git = "https://github.com/fgardt/factorio-scanner" }
 
 [target.'cfg(windows)'.dependencies]
-zip = "2.1.6"
+anyhow = "1.0"
 dll-syringe = "0.15.2"
 windows = { version = "0.58.0", features = [
     "Win32",
@@ -20,7 +26,9 @@ windows = { version = "0.58.0", features = [
 ] }
 
 [target.'cfg(unix)'.dependencies]
-ctor = "0.2.8"
+abi_stable = "0.11.3"
+ctor = "0.2"
+libloading = "0.8"
 
 [lib]
 crate-type = ["cdylib"]

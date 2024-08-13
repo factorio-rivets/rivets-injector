@@ -6,6 +6,10 @@ use std::{
 };
 
 use configparser::ini::Ini;
+use mod_util::{
+    mod_list::{ModList, ModListError},
+    mod_loader::ModError,
+};
 
 struct CfgFile {
     map: HashMap<String, String>,
@@ -104,7 +108,64 @@ pub fn get_data_dirs(bin_path: impl AsRef<Path>) -> Result<(PathBuf, PathBuf), C
         .ok_or(ConfigError::MissingKey("write-data".to_string()))?;
 
     Ok((
-        resolve_path(&read_path, &bin_path)?,
-        resolve_path(&write_path, bin_path)?,
+        resolve_path(&read_path, &bin_path)?.canonicalize()?,
+        resolve_path(&write_path, bin_path)?.canonicalize()?,
     ))
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ExtractError {
+    #[error("{0}")]
+    ModList(#[from] ModListError),
+
+    #[error("{0}")]
+    Mod(#[from] ModError),
+
+    #[error("{0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Rivets is not enabled")]
+    RivetsNotEnabled,
+}
+
+pub fn extract_rivets_lib(
+    read_data: impl AsRef<Path>,
+    write_data: impl AsRef<Path>,
+) -> Result<PathBuf, ExtractError> {
+    #[cfg(target_os = "linux")]
+    static RIVETS_LIB: &str = "rivets.so";
+    #[cfg(target_os = "windows")]
+    static RIVETS_LIB: &str = "rivets.dll";
+
+    let mut mod_list = ModList::generate_custom(read_data, &write_data)?;
+    mod_list.load()?;
+
+    let Some(rivets) = mod_list.load_mod("rivets")? else {
+        return Err(ExtractError::RivetsNotEnabled);
+    };
+
+    let lib = rivets.get_file(RIVETS_LIB)?;
+
+    std::fs::create_dir_all(write_data.as_ref().join("temp/rivets"))?;
+
+    let lib_path = write_data.as_ref().join("temp/rivets").join(RIVETS_LIB);
+    std::fs::write(&lib_path, lib)?;
+
+    Ok(lib_path)
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BinFolderError {
+    #[error("Failed to get binary path: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Failed to get binary folder")]
+    BinFolder,
+}
+
+pub fn get_bin_folder() -> Result<PathBuf, BinFolderError> {
+    std::env::current_exe()?
+        .parent()
+        .map(std::path::Path::to_path_buf)
+        .ok_or(BinFolderError::BinFolder)
 }
