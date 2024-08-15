@@ -189,9 +189,11 @@ pub fn run() -> Result<()> {
         attempt_kill_factorio(factorio_process_information);
     })?;
 
-    let symbol_cache = SymbolCache::new(pdb_path, "factorio.exe").inspect_err(|_| {
-        attempt_kill_factorio(factorio_process_information);
-    }).context("Failed to create symbol cache.")?;
+    let symbol_cache = SymbolCache::new(pdb_path, "factorio.exe")
+        .inspect_err(|_| {
+            attempt_kill_factorio(factorio_process_information);
+        })
+        .context("Failed to create symbol cache.")?;
 
     for (mod_name, dll_path) in all_mods {
         println!("Discovered rivets mod: {mod_name}");
