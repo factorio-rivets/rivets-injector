@@ -179,6 +179,10 @@ pub fn run() -> Result<()> {
     let factorio_path = bin_path.join("factorio.exe");
     let pdb_path = bin_path.join("factorio.pdb");
 
+    println!("Creating symbol cache...");
+    let symbol_cache = SymbolCache::new(pdb_path, "factorio.exe");
+    let symbol_cache = symbol_cache.context("Failed to create symbol cache.")?;
+
     let factorio_path = CString::new(factorio_path.as_os_str().to_string_lossy().into_owned()).context("Failed to convert Factorio path to CString. Do you have any invalid chars in your Factorio path? Please report this on the Rivets Github.")?;
     println!("Factorio path: {factorio_path:?}");
     let factorio_path = PCSTR(factorio_path.as_ptr().cast());
@@ -188,12 +192,6 @@ pub fn run() -> Result<()> {
     let syringe = get_syringe().inspect_err(|_| {
         attempt_kill_factorio(factorio_process_information);
     })?;
-
-    let symbol_cache = SymbolCache::new(pdb_path, "factorio.exe")
-        .inspect_err(|_| {
-            attempt_kill_factorio(factorio_process_information);
-        })
-        .context("Failed to create symbol cache.")?;
 
     for (mod_name, dll_path) in all_mods {
         println!("Discovered rivets mod: {mod_name}");
